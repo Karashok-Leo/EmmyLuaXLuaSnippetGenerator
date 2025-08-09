@@ -76,15 +76,18 @@ namespace Editor.EmmyLuaSnippetGenerator
             }
 
             _options = loaded;
-            if (!Directory.Exists(_options.subGeneratePath))
+            if (!Directory.Exists(_options.GeneratePath))
             {
-                Directory.CreateDirectory(_options.subGeneratePath);
+                Directory.CreateDirectory(_options.GeneratePath);
             }
 
             try
             {
-                var set = CollectAllExportType();
-                ExportTypeList.AddRange(set);
+                XLuaHelper.SetupXLuaConfig();
+
+                // var set = CollectAllExportType();
+                var types = XLuaHelper.LuaCallCSharpTypes;
+                ExportTypeList.AddRange(types);
 
                 _functionCompatibleTypes = _options.GetFunctionCompatibleTypes();
 
@@ -124,13 +127,13 @@ namespace Editor.EmmyLuaSnippetGenerator
 
             _options = loaded;
 
-            if (!Directory.Exists(_options.subGeneratePath))
+            if (!Directory.Exists(_options.GeneratePath))
             {
                 return;
             }
 
             var count = 0;
-            var files = Directory.GetFiles(_options.subGeneratePath, "TypeHint_*.lua");
+            var files = Directory.GetFiles(_options.GeneratePath, "TypeHint_*.lua");
 
             foreach (var file in files)
             {
@@ -141,6 +144,8 @@ namespace Editor.EmmyLuaSnippetGenerator
             Debug.Log($"清除完毕, 删除了 {count} 份注解文件. (生成时会自动执行该清理)");
         }
 
+        [Obsolete]
+        // ReSharper disable once UnusedMember.Local
         private static HashSet<Type> CollectAllExportType()
         {
             // 收集要导出的类型
@@ -159,6 +164,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             return set;
         }
 
+        [Obsolete]
         private static bool IsExportType(Type item)
         {
             var targetNamespaces = _options.GetTargetNamespaces();
@@ -199,6 +205,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             return false;
         }
 
+        [Obsolete]
         private static Type[] CollectType(Assembly assembly)
         {
             var types = assembly.GetTypes();
@@ -255,7 +262,8 @@ namespace Editor.EmmyLuaSnippetGenerator
 
             WriteXLuaDefine();
 
-            var targetNamespaces = _options.GetTargetNamespaces();
+            // var targetNamespaces = _options.GetTargetNamespaces();
+            var targetNamespaces = XLuaHelper.GetTargetNamespaces();
 
             foreach (var namespaceName in targetNamespaces)
             {
@@ -314,7 +322,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             {
                 if (writer == null)
                 {
-                    var fileName = $"{_options.subGeneratePath}/TypeHint_{fileCount}.lua";
+                    var fileName = $"{_options.GeneratePath}/TypeHint_{fileCount}.lua";
                     writer = new StreamWriter(fileName);
                     writer.WriteLine("---@meta");
                     writer.WriteLine("");
@@ -852,6 +860,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             return prefix + typeName;
         }
 
+        // ReSharper disable once UnusedMember.Local
         private static readonly Dictionary<Type, string> CSharpTypeNameDic = new()
         {
             { typeof(byte), "byte" },

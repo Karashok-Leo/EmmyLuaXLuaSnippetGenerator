@@ -10,15 +10,21 @@ namespace Editor.EmmyLuaSnippetGenerator
     public sealed class SettingOptions
     {
         public string subGeneratePath;
+
+        [Obsolete]
         public string targetNamespacesStr;
+
         public string globalVariablesStr;
         public string functionCompatibleTypesStr;
         public bool generateCsAlias = true;
         public bool inferGenericFieldType = true;
         public int singleFileMaxLine = 5000;
 
+        public string GeneratePath => Path.Combine(Application.dataPath, subGeneratePath);
+
         public static string SavePath => Path.Combine(Application.dataPath, "Editor", "EmmyLuaSnippetGenerator", "config.xml");
 
+        [Obsolete]
         public string[] GetTargetNamespaces()
         {
             return string.IsNullOrWhiteSpace(targetNamespacesStr) ?
@@ -73,17 +79,17 @@ namespace Editor.EmmyLuaSnippetGenerator
                 GUILayout.MinWidth(200)
             );
 
-            GUILayout.Space(10);
-
-            GUILayout.Label(
-                "要生成注解的C#命名空间"
-                + "\n- 多个命名空间用空格分隔"
-                + "\n- 例如: UnityEngine DG FairyGUI"
-            );
-            _options.targetNamespacesStr = EditorGUILayout.TextField(
-                _options.targetNamespacesStr,
-                GUILayout.MinWidth(200)
-            );
+            // GUILayout.Space(10);
+            //
+            // GUILayout.Label(
+            //     "要生成注解的C#命名空间"
+            //     + "\n- 多个命名空间用空格分隔"
+            //     + "\n- 例如: UnityEngine DG FairyGUI"
+            // );
+            // _options.targetNamespacesStr = EditorGUILayout.TextField(
+            //     _options.targetNamespacesStr,
+            //     GUILayout.MinWidth(200)
+            // );
 
             GUILayout.Space(10);
 
