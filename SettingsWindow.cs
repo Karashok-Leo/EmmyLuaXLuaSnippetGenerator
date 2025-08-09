@@ -1,63 +1,62 @@
+using System;
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using System.Xml;
-using System.IO;
-using System;
-using System.Linq;
 
-namespace EmmyLuaSnippetGenerator
+namespace Editor.EmmyLuaSnippetGenerator
 {
     [Serializable]
     public sealed class SettingOptions
     {
-        public string GeneratePath;
-        public string TargetNamespacesStr;
-        public string GlobalVariablesStr;
-        public string FunctionCompatibleTypesStr;
-        public bool GenerateCSAlias = true;
-        public bool InferGenericFieldType = true;
-        public int SingleFileMaxLine = 5000;
+        public string generatePath;
+        public string targetNamespacesStr;
+        public string globalVariablesStr;
+        public string functionCompatibleTypesStr;
+        public bool generateCsAlias = true;
+        public bool inferGenericFieldType = true;
+        public int singleFileMaxLine = 5000;
 
-        private static string _saveRootPath = null;
+        private static string _saveRootPath;
+
         public static string SaveRootPath
         {
-            get => string.IsNullOrWhiteSpace(_saveRootPath)
-                ? AppDomain.CurrentDomain.BaseDirectory
-                : _saveRootPath;
+            get => string.IsNullOrWhiteSpace(_saveRootPath) ? AppDomain.CurrentDomain.BaseDirectory : _saveRootPath;
             set => _saveRootPath = value;
         }
+
         public static string SavePath => Path.Combine(SaveRootPath, "EmmyLuaSnippetToolData", "config.xml");
 
         public string[] GetTargetNamespaces()
         {
-            if (string.IsNullOrWhiteSpace(TargetNamespacesStr))
+            if (string.IsNullOrWhiteSpace(targetNamespacesStr))
             {
                 return Array.Empty<string>();
             }
 
-            return TargetNamespacesStr.Split(' ');
+            return targetNamespacesStr.Split(' ');
         }
 
         // varName, typeName
         public (string, string)[] GetGlobalVariables()
         {
-            if (string.IsNullOrWhiteSpace(GlobalVariablesStr))
+            if (string.IsNullOrWhiteSpace(globalVariablesStr))
             {
                 return Array.Empty<(string, string)>();
             }
 
-            var varInfos = GlobalVariablesStr.Split(' ');
+            var varInfos = globalVariablesStr.Split(' ');
             return varInfos.Select(info => info.Split(':')).Select(info => (info[0], info[1])).ToArray();
         }
 
         public string[] GetFunctionCompatibleTypes()
         {
-            if (string.IsNullOrWhiteSpace(FunctionCompatibleTypesStr))
+            if (string.IsNullOrWhiteSpace(functionCompatibleTypesStr))
             {
                 return Array.Empty<string>();
             }
 
-            return FunctionCompatibleTypesStr.Split(' ');
+            return functionCompatibleTypesStr.Split(' ');
         }
     }
 
@@ -73,14 +72,7 @@ namespace EmmyLuaSnippetGenerator
 
         private void OnEnable()
         {
-            if (XmlHelper.TryLoadConfig(SettingOptions.SavePath, out SettingOptions settings))
-            {
-                _options = settings;
-            }
-            else
-            {
-                _options = new();
-            }
+            _options = XmlHelper.TryLoadConfig(SettingOptions.SavePath, out SettingOptions settings) ? settings : new SettingOptions();
         }
 
         private void OnGUI()
@@ -100,7 +92,8 @@ namespace EmmyLuaSnippetGenerator
             if (GUILayout.Button("...", GUILayout.Width(50)))
             {
                 SettingOptions.SaveRootPath = EditorUtility.OpenFolderPanel("选择配置文件存放路径", "", "");
-            };
+            }
+
             EditorGUILayout.EndHorizontal();
 
             GUILayout.Space(10);
@@ -110,15 +103,16 @@ namespace EmmyLuaSnippetGenerator
             );
             EditorGUILayout.BeginHorizontal();
             GUI.enabled = false;
-            _options.GeneratePath = EditorGUILayout.TextField(
-                _options.GeneratePath,
+            _options.generatePath = EditorGUILayout.TextField(
+                _options.generatePath,
                 GUILayout.MinWidth(200)
             );
             GUI.enabled = true;
             if (GUILayout.Button("...", GUILayout.Width(50)))
             {
-                _options.GeneratePath = EditorUtility.OpenFolderPanel("选择生成类型注解文件路径", "", "");
-            };
+                _options.generatePath = EditorUtility.OpenFolderPanel("选择生成类型注解文件路径", "", "");
+            }
+
             EditorGUILayout.EndHorizontal();
 
             GUILayout.Space(10);
@@ -128,8 +122,8 @@ namespace EmmyLuaSnippetGenerator
                 + "\n- 多个命名空间用空格分隔"
                 + "\n- 例如: UnityEngine DG FairyGUI"
             );
-            _options.TargetNamespacesStr = EditorGUILayout.TextField(
-                _options.TargetNamespacesStr,
+            _options.targetNamespacesStr = EditorGUILayout.TextField(
+                _options.targetNamespacesStr,
                 GUILayout.MinWidth(200)
             );
 
@@ -140,8 +134,8 @@ namespace EmmyLuaSnippetGenerator
                 + "\n- 变量名:类型名, 多个组用空格分隔"
                 + "\n- 例如: UNITY_EDITOR:boolean DEBUG_LV:integer"
             );
-            _options.GlobalVariablesStr = EditorGUILayout.TextField(
-                _options.GlobalVariablesStr,
+            _options.globalVariablesStr = EditorGUILayout.TextField(
+                _options.globalVariablesStr,
                 GUILayout.MinWidth(200)
             );
 
@@ -152,8 +146,8 @@ namespace EmmyLuaSnippetGenerator
                 + "\n- 多个类型名用空格分隔"
                 + "\n- 例如: System.Action FairyGUI.EventCallback0"
             );
-            _options.FunctionCompatibleTypesStr = EditorGUILayout.TextField(
-                _options.FunctionCompatibleTypesStr,
+            _options.functionCompatibleTypesStr = EditorGUILayout.TextField(
+                _options.functionCompatibleTypesStr,
                 GUILayout.MinWidth(200)
             );
 
@@ -163,8 +157,8 @@ namespace EmmyLuaSnippetGenerator
                 "生成带CS.前缀的兼容alias"
                 + "\n- 启用后, 将为生成的类型名额外添加带CS.前缀的版本"
             );
-            _options.GenerateCSAlias = EditorGUILayout.Toggle(_options.GenerateCSAlias);
-            
+            _options.generateCsAlias = EditorGUILayout.Toggle(_options.generateCsAlias);
+
             GUILayout.Space(10);
 
             GUILayout.Label(
@@ -172,7 +166,7 @@ namespace EmmyLuaSnippetGenerator
                 + "\n- 启用后, 将在继承泛型类的非泛型派生中添加泛型字段的类型"
                 + "\n- 显著影响注解生成速度, 但不影响类型分析性能"
             );
-            _options.InferGenericFieldType = EditorGUILayout.Toggle(_options.InferGenericFieldType);
+            _options.inferGenericFieldType = EditorGUILayout.Toggle(_options.inferGenericFieldType);
 
             GUILayout.Space(10);
 
@@ -181,8 +175,8 @@ namespace EmmyLuaSnippetGenerator
                 + "\n- 超过该行数时会自动拆分成多个文件"
                 + "\n- 大幅影响类型分析性能, 请依据电脑配置设置"
             );
-            _options.SingleFileMaxLine = (int)EditorGUILayout.Slider(
-                _options.SingleFileMaxLine,
+            _options.singleFileMaxLine = (int)EditorGUILayout.Slider(
+                _options.singleFileMaxLine,
                 5000,
                 40000,
                 GUILayout.MinWidth(200)
@@ -195,7 +189,7 @@ namespace EmmyLuaSnippetGenerator
                 try
                 {
                     XmlHelper.SaveConfig(_options, SettingOptions.SavePath);
-                    this.Close();
+                    Close();
                 }
                 catch (UnauthorizedAccessException e)
                 {
@@ -205,10 +199,8 @@ namespace EmmyLuaSnippetGenerator
 
             if (GUILayout.Button("取消"))
             {
-                this.Close();
+                Close();
             }
         }
     }
 }
-
-

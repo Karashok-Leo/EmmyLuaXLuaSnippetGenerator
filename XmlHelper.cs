@@ -2,15 +2,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Xml.Serialization;
 
-namespace EmmyLuaSnippetGenerator
+namespace Editor.EmmyLuaSnippetGenerator
 {
     public static class XmlHelper
     {
         public static void SaveConfig<T>(T config, string filePath)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            var directoryName = Path.GetDirectoryName(filePath);
+            if (string.IsNullOrEmpty(directoryName))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                throw new DirectoryNotFoundException("Directory name cannot be null or empty.");
+            }
+
+            if (!Directory.Exists(directoryName))
+            {
+                Directory.CreateDirectory(directoryName);
             }
 
             XmlSerializer serializer = new(typeof(T));
@@ -30,7 +36,7 @@ namespace EmmyLuaSnippetGenerator
 
             XmlSerializer serializer = new(typeof(T));
             using StreamReader reader = new(filePath);
-        
+
             config = (T)serializer.Deserialize(reader);
             return true;
         }
@@ -41,4 +47,3 @@ namespace EmmyLuaSnippetGenerator
         }
     }
 }
-
