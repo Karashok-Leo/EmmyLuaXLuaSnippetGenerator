@@ -373,14 +373,32 @@ namespace Editor.EmmyLuaSnippetGenerator
 
         private static void WriteClassDefine(Type type)
         {
+            Sb.Append($"---@class {type.ToLuaTypeName()}");
+
+            var superTypes = new List<Type>();
+
             if (type.BaseType != null && !type.IsEnum)
             {
-                Sb.AppendLine($"---@class {type.ToLuaTypeName()} : {type.BaseType.ToLuaTypeName()}");
+                superTypes.Add(type.BaseType);
             }
-            else
+
+            foreach (var @interface in type.GetInterfaces())
             {
-                Sb.AppendLine($"---@class {type.ToLuaTypeName()}");
+                superTypes.Add(@interface);
             }
+
+            if (superTypes.Count > 0)
+            {
+                Sb.Append(" : ");
+                Sb.Append(superTypes[0].ToLuaTypeName());
+                for (var i = 1; i < superTypes.Count; i++)
+                {
+                    Sb.Append(" & ");
+                    Sb.Append(superTypes[i].ToLuaTypeName());
+                }
+            }
+
+            Sb.AppendLine();
         }
 
         private static void WriteClassFieldDefine(Type classType)
