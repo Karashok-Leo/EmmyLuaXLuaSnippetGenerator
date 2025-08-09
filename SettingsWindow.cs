@@ -9,7 +9,7 @@ namespace Editor.EmmyLuaSnippetGenerator
     [Serializable]
     public sealed class SettingOptions
     {
-        public string generatePath;
+        public string subGeneratePath;
         public string targetNamespacesStr;
         public string globalVariablesStr;
         public string functionCompatibleTypesStr;
@@ -17,24 +17,13 @@ namespace Editor.EmmyLuaSnippetGenerator
         public bool inferGenericFieldType = true;
         public int singleFileMaxLine = 5000;
 
-        private static string _saveRootPath;
-
-        public static string SaveRootPath
-        {
-            get => string.IsNullOrWhiteSpace(_saveRootPath) ? AppDomain.CurrentDomain.BaseDirectory : _saveRootPath;
-            set => _saveRootPath = value;
-        }
-
-        public static string SavePath => Path.Combine(SaveRootPath, "EmmyLuaSnippetToolData", "config.xml");
+        public static string SavePath => Path.Combine(Application.dataPath, "Editor", "EmmyLuaSnippetGenerator", "config.xml");
 
         public string[] GetTargetNamespaces()
         {
-            if (string.IsNullOrWhiteSpace(targetNamespacesStr))
-            {
-                return Array.Empty<string>();
-            }
-
-            return targetNamespacesStr.Split(' ');
+            return string.IsNullOrWhiteSpace(targetNamespacesStr) ?
+                Array.Empty<string>() :
+                targetNamespacesStr.Split(' ');
         }
 
         // varName, typeName
@@ -51,12 +40,9 @@ namespace Editor.EmmyLuaSnippetGenerator
 
         public string[] GetFunctionCompatibleTypes()
         {
-            if (string.IsNullOrWhiteSpace(functionCompatibleTypesStr))
-            {
-                return Array.Empty<string>();
-            }
-
-            return functionCompatibleTypesStr.Split(' ');
+            return string.IsNullOrWhiteSpace(functionCompatibleTypesStr) ?
+                Array.Empty<string>() :
+                functionCompatibleTypesStr.Split(' ');
         }
     }
 
@@ -80,40 +66,12 @@ namespace Editor.EmmyLuaSnippetGenerator
             GUILayout.Space(20);
 
             GUILayout.Label(
-                "配置文件的存放路径"
-            );
-            EditorGUILayout.BeginHorizontal();
-            GUI.enabled = false;
-            SettingOptions.SaveRootPath = EditorGUILayout.TextField(
-                SettingOptions.SaveRootPath,
-                GUILayout.MinWidth(200)
-            );
-            GUI.enabled = true;
-            if (GUILayout.Button("...", GUILayout.Width(50)))
-            {
-                SettingOptions.SaveRootPath = EditorUtility.OpenFolderPanel("选择配置文件存放路径", "", "");
-            }
-
-            EditorGUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
-
-            GUILayout.Label(
                 "生成类型注解文件的路径"
             );
-            EditorGUILayout.BeginHorizontal();
-            GUI.enabled = false;
-            _options.generatePath = EditorGUILayout.TextField(
-                _options.generatePath,
+            _options.subGeneratePath = EditorGUILayout.TextField(
+                _options.subGeneratePath,
                 GUILayout.MinWidth(200)
             );
-            GUI.enabled = true;
-            if (GUILayout.Button("...", GUILayout.Width(50)))
-            {
-                _options.generatePath = EditorUtility.OpenFolderPanel("选择生成类型注解文件路径", "", "");
-            }
-
-            EditorGUILayout.EndHorizontal();
 
             GUILayout.Space(10);
 
@@ -193,7 +151,8 @@ namespace Editor.EmmyLuaSnippetGenerator
                 }
                 catch (UnauthorizedAccessException e)
                 {
-                    Debug.LogError($"错误: 没有对目录 {SettingOptions.SaveRootPath} 的操作权限. 尝试修改配置文件的存放路径.\n{e.StackTrace}");
+                    // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                    Debug.LogError($"错误: 没有对目录 {SettingOptions.SavePath} 的操作权限. 尝试修改配置文件的存放路径.\n{e.StackTrace}");
                 }
             }
 

@@ -76,9 +76,9 @@ namespace Editor.EmmyLuaSnippetGenerator
             }
 
             _options = loaded;
-            if (!Directory.Exists(_options.generatePath))
+            if (!Directory.Exists(_options.subGeneratePath))
             {
-                Directory.CreateDirectory(_options.generatePath);
+                Directory.CreateDirectory(_options.subGeneratePath);
             }
 
             try
@@ -124,13 +124,13 @@ namespace Editor.EmmyLuaSnippetGenerator
 
             _options = loaded;
 
-            if (!Directory.Exists(_options.generatePath))
+            if (!Directory.Exists(_options.subGeneratePath))
             {
                 return;
             }
 
             var count = 0;
-            var files = Directory.GetFiles(_options.generatePath, "TypeHint_*.lua");
+            var files = Directory.GetFiles(_options.subGeneratePath, "TypeHint_*.lua");
 
             foreach (var file in files)
             {
@@ -314,7 +314,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             {
                 if (writer == null)
                 {
-                    var fileName = $"{_options.generatePath}/TypeHint_{fileCount}.lua";
+                    var fileName = $"{_options.subGeneratePath}/TypeHint_{fileCount}.lua";
                     writer = new StreamWriter(fileName);
                     writer.WriteLine("---@meta");
                     writer.WriteLine("");
