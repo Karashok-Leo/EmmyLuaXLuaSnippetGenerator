@@ -14,9 +14,15 @@ namespace Editor.EmmyLuaSnippetGenerator
         [Obsolete]
         public string targetNamespacesStr;
 
-        public string globalVariablesStr;
+        [Obsolete]
         public string functionCompatibleTypesStr;
-        public bool generateCsAlias = true;
+
+        public string globalVariablesStr;
+
+        public bool useLuaString = true;
+        public bool useLuaFunction = true;
+        public bool useTypeFullName = true;
+        public bool generateCSharpAlias = true;
         public bool inferGenericFieldType = true;
         public int singleFileMaxLine = 5000;
 
@@ -44,6 +50,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             return varInfos.Select(info => info.Split(':')).Select(info => (info[0], info[1])).ToArray();
         }
 
+        [Obsolete]
         public string[] GetFunctionCompatibleTypes()
         {
             return string.IsNullOrWhiteSpace(functionCompatibleTypesStr) ?
@@ -91,6 +98,18 @@ namespace Editor.EmmyLuaSnippetGenerator
             //     GUILayout.MinWidth(200)
             // );
 
+            // GUILayout.Space(10);
+            //
+            // GUILayout.Label(
+            //     "使以下类型名兼容Lua function类型"
+            //     + "\n- 多个类型名用空格分隔"
+            //     + "\n- 例如: System.Action FairyGUI.EventCallback0"
+            // );
+            // _options.functionCompatibleTypesStr = EditorGUILayout.TextField(
+            //     _options.functionCompatibleTypesStr,
+            //     GUILayout.MinWidth(200)
+            // );
+
             GUILayout.Space(10);
 
             GUILayout.Label(
@@ -106,14 +125,26 @@ namespace Editor.EmmyLuaSnippetGenerator
             GUILayout.Space(10);
 
             GUILayout.Label(
-                "使以下类型名兼容Lua function类型"
-                + "\n- 多个类型名用空格分隔"
-                + "\n- 例如: System.Action FairyGUI.EventCallback0"
+                "使用Lua string类型"
+                + "\n- 启用后, 使string兼容Lua string类型"
             );
-            _options.functionCompatibleTypesStr = EditorGUILayout.TextField(
-                _options.functionCompatibleTypesStr,
-                GUILayout.MinWidth(200)
+            _options.useLuaString = EditorGUILayout.Toggle(_options.useLuaString);
+
+            GUILayout.Space(10);
+
+            GUILayout.Label(
+                "使用Lua function类型"
+                + "\n- 启用后, 使string兼容Lua function类型"
             );
+            _options.useLuaFunction = EditorGUILayout.Toggle(_options.useLuaFunction);
+
+            GUILayout.Space(10);
+
+            GUILayout.Label(
+                "使用类型全名"
+                + "\n- 启用后, 使用带命名空间名称的类型全名"
+            );
+            _options.useTypeFullName = EditorGUILayout.Toggle(_options.useTypeFullName);
 
             GUILayout.Space(10);
 
@@ -121,7 +152,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                 "生成带CS.前缀的兼容alias"
                 + "\n- 启用后, 将为生成的类型名额外添加带CS.前缀的版本"
             );
-            _options.generateCsAlias = EditorGUILayout.Toggle(_options.generateCsAlias);
+            _options.generateCSharpAlias = EditorGUILayout.Toggle(_options.generateCSharpAlias);
 
             GUILayout.Space(10);
 

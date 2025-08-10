@@ -57,6 +57,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             "while"
         };
 
+        [Obsolete]
         private static string[] _functionCompatibleTypes;
 
         private static readonly StringBuilder Sb = new(1024);
@@ -89,7 +90,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                 var types = XLuaHelper.LuaCallCSharpTypes;
                 ExportTypeList.AddRange(types);
 
-                _functionCompatibleTypes = _options.GetFunctionCompatibleTypes();
+                // _functionCompatibleTypes = _options.GetFunctionCompatibleTypes();
 
                 HandleExtensionMethods();
 
@@ -270,7 +271,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                 Sb.AppendLine($"---@class {namespaceName}");
                 Sb.AppendLine($"{namespaceName} = {{}}");
 
-                if (_options.generateCsAlias)
+                if (_options.generateCSharpAlias)
                 {
                     var namespaceCSharpAlias = $"CS.{namespaceName}";
 
@@ -289,13 +290,13 @@ namespace Editor.EmmyLuaSnippetGenerator
                     continue;
                 }
 
-                _keepStringTypeName = typeInst == typeof(string);
+                // _keepStringTypeName = typeInst == typeof(string);
 
                 WriteClassDefine(typeInst);
                 WriteClassFieldDefine(typeInst);
                 Sb.AppendLine($"{typeInst.ToLuaTypeName().ReplaceDotOrPlusWithUnderscore()} = {{}}");
 
-                if (_options.generateCsAlias)
+                if (_options.generateCSharpAlias)
                 {
                     WriteClassAliasDefine(typeInst);
                 }
@@ -366,7 +367,7 @@ namespace Editor.EmmyLuaSnippetGenerator
 
             // typeof function
             Sb.AppendLine("---@param obj any");
-            Sb.AppendLine("---@return System.Type");
+            Sb.AppendLine($"---@return {typeof(Type).ToLuaTypeName()}");
             Sb.AppendLine("function typeof(obj) end");
             Sb.AppendLine();
         }
@@ -425,9 +426,9 @@ namespace Editor.EmmyLuaSnippetGenerator
                     continue;
                 }
 
-                var fieldTypeName = fieldInfo.FieldType.ToLuaTypeName();
+                var fieldTypeName = fieldInfo.FieldType.ToLuaTypeName(compatible: true);
 
-                Sb.AppendLine($"---@field {fieldInfo.Name} {fieldTypeName.MakeLuaFunctionCompatible()}");
+                Sb.AppendLine($"---@field {fieldInfo.Name} {fieldTypeName}");
             }
 
             var publicInstancePropertyInfo =
@@ -451,9 +452,9 @@ namespace Editor.EmmyLuaSnippetGenerator
                     continue;
                 }
 
-                var propertyTypeName = propertyInfo.PropertyType.ToLuaTypeName();
+                var propertyTypeName = propertyInfo.PropertyType.ToLuaTypeName(compatible: true);
 
-                Sb.AppendLine($"---@field {propertyInfo.Name} {propertyTypeName.MakeLuaFunctionCompatible()}");
+                Sb.AppendLine($"---@field {propertyInfo.Name} {propertyTypeName}");
             }
 
             if (!_options.inferGenericFieldType)
@@ -664,7 +665,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             {
                 var parameterInfo = parameterInfos[i];
                 var parameterName = parameterInfo.Name;
-                var parameterTypeName = parameterInfo.ParameterType.ToLuaTypeName().MakeLuaFunctionCompatible();
+                var parameterTypeName = parameterInfo.ParameterType.ToLuaTypeName(compatible: true);
                 if (parameterInfo.IsOut)
                 {
                     outOrRefParameterInfoList.Add(parameterInfo);
@@ -676,7 +677,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                     parameterName = "ref_" + parameterName;
                     outOrRefParameterInfoList.Add(parameterInfo);
 
-                    parameterTypeName = parameterInfo.ParameterType.GetElementType().ToLuaTypeName().MakeLuaFunctionCompatible();
+                    parameterTypeName = parameterInfo.ParameterType.GetElementType().ToLuaTypeName(compatible: true);
                 }
 
                 // write self parameter
@@ -712,13 +713,10 @@ namespace Editor.EmmyLuaSnippetGenerator
             var returnTypeString = "";
             for (var i = 0; i < returnTypeList.Count; i++)
             {
-                if (i == returnTypeList.Count - 1)
+                returnTypeString += returnTypeList[i].ToLuaTypeName(compatible: true);
+                if (i != returnTypeList.Count - 1)
                 {
-                    returnTypeString += returnTypeList[i].ToLuaTypeName();
-                }
-                else
-                {
-                    returnTypeString += returnTypeList[i].ToLuaTypeName() + ", ";
+                    returnTypeString += ", ";
                 }
             }
 
@@ -745,7 +743,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             {
                 var parameterInfo = parameterInfos[i];
                 var parameterName = parameterInfo.Name;
-                var parameterTypeName = parameterInfo.ParameterType.ToLuaTypeName();
+                var parameterTypeName = parameterInfo.ParameterType.ToLuaTypeName(compatible: true);
                 if (parameterInfo.IsOut)
                 {
                     outOrRefParameterInfoList.Add(parameterInfo);
@@ -757,7 +755,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                     parameterName = "ref_" + parameterName;
                     outOrRefParameterInfoList.Add(parameterInfo);
 
-                    parameterTypeName = parameterInfo.ParameterType.GetElementType().ToLuaTypeName();
+                    parameterTypeName = parameterInfo.ParameterType.GetElementType().ToLuaTypeName(compatible: true);
                 }
 
                 parameterName = EscapeLuaKeyword(parameterName);
@@ -770,7 +768,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                 TempSb.Append(parameterName);
                 firstParam = false;
 
-                Sb.AppendLine($"---@param {parameterName} {parameterTypeName.MakeLuaFunctionCompatible()}");
+                Sb.AppendLine($"---@param {parameterName} {parameterTypeName}");
             }
 
             var returnTypeList = new List<Type>();
@@ -787,12 +785,12 @@ namespace Editor.EmmyLuaSnippetGenerator
             if (returnTypeList.Count > 0)
             {
                 Sb.Append("---@return ");
-                Sb.Append(returnTypeList[0].ToLuaTypeName().MakeLuaFunctionCompatible());
+                Sb.Append(returnTypeList[0].ToLuaTypeName(compatible: true));
 
                 for (var i = 1; i < returnTypeList.Count; i++)
                 {
                     Sb.Append(", ");
-                    Sb.Append(returnTypeList[i].ToLuaTypeName().MakeLuaFunctionCompatible());
+                    Sb.Append(returnTypeList[i].ToLuaTypeName(compatible: true));
                 }
 
                 Sb.AppendLine();
@@ -831,14 +829,17 @@ namespace Editor.EmmyLuaSnippetGenerator
 
         #endregion
 
+        [Obsolete]
+        // ReSharper disable once UnusedMember.Local
         private static string MakeLuaFunctionCompatible(this string typeName)
         {
             return _functionCompatibleTypes.Contains(typeName) ? typeName + " | function" : typeName;
         }
 
+        [Obsolete]
         private static bool _keepStringTypeName;
 
-        private static string ToLuaTypeName(this Type type, bool addCSharpPrefix = false)
+        private static string ToLuaTypeName(this Type type, bool addCSharpPrefix = false, bool compatible = false)
         {
             var prefix = addCSharpPrefix ? "CS." : "";
 
@@ -852,25 +853,39 @@ namespace Editor.EmmyLuaSnippetGenerator
                 return "number";
             }
 
-            if (type == typeof(string))
-            {
-                return _keepStringTypeName ? "System.String" : "string";
-            }
-
             if (type == typeof(bool))
             {
                 return "boolean";
             }
 
-            var typeName = type.FullName;
+            var suffix = "";
+            if (compatible)
+            {
+                if (type == typeof(object))
+                {
+                    suffix = " | any";
+                }
+                else if (type == typeof(string) && _options.useLuaString)
+                {
+                    suffix = " | string";
+                }
+                else if (typeof(Delegate).IsAssignableFrom(type) && _options.useLuaFunction)
+                {
+                    suffix = " | function";
+                }
+            }
+
+            var typeName = _options.useTypeFullName || addCSharpPrefix ?
+                type.FullName :
+                type.Name;
             if (typeName == null)
             {
-                return prefix + type.ToString().EscapeGenericTypeSuffix();
+                return prefix + type.ToString().EscapeGenericTypeSuffix() + suffix;
             }
 
             if (type.IsEnum)
             {
-                return prefix + type.FullName.EscapeGenericTypeSuffix().Replace("+", ".");
+                return prefix + typeName.EscapeGenericTypeSuffix().Replace("+", ".") + suffix;
             }
 
             // 去除泛型后缀
@@ -882,7 +897,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                 typeName = typeName[..bracketIndex];
             }
 
-            return prefix + typeName;
+            return prefix + typeName + suffix;
         }
 
         // ReSharper disable once UnusedMember.Local
