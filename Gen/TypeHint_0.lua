@@ -104,9 +104,8 @@ function UnityEngine.GameObject:GetComponentsInChildren(type, includeInactive) e
 ---@return UnityEngine.Component[]
 function UnityEngine.GameObject:GetComponentsInParent(type, includeInactive) end
 ---@param type System.Type
----@param out_component UnityEngine.Component
----@return boolean,UnityEngine.Component
-function UnityEngine.GameObject:TryGetComponent(type, out_component) end
+---@return boolean, UnityEngine.Component
+function UnityEngine.GameObject:TryGetComponent(type, ) end
 ---@overload fun(self: UnityEngine.GameObject, methodName: string, options: UnityEngine.SendMessageOptions)
 ---@overload fun(self: UnityEngine.GameObject, methodName: string, value: System.Object, options: UnityEngine.SendMessageOptions)
 ---@overload fun(self: UnityEngine.GameObject, methodName: string, value: System.Object)
@@ -140,7 +139,7 @@ function UnityEngine.GameObject:SetActive(value) end
 ---@return boolean
 function UnityEngine.GameObject:CompareTag(tag) end
 
----@class UnityEngine.Transform : UnityEngine.Component
+---@class UnityEngine.Transform : UnityEngine.Component & System.Collections.IEnumerable
 ---@field position UnityEngine.Vector3
 ---@field localPosition UnityEngine.Vector3
 ---@field eulerAngles UnityEngine.Vector3
@@ -174,14 +173,10 @@ function UnityEngine.Transform:SetPositionAndRotation(position, rotation) end
 ---@param localPosition UnityEngine.Vector3
 ---@param localRotation UnityEngine.Quaternion
 function UnityEngine.Transform:SetLocalPositionAndRotation(localPosition, localRotation) end
----@param out_position UnityEngine.Vector3
----@param out_rotation UnityEngine.Quaternion
----@return ,UnityEngine.Vector3,UnityEngine.Quaternion
-function UnityEngine.Transform:GetPositionAndRotation(out_position, out_rotation) end
----@param out_localPosition UnityEngine.Vector3
----@param out_localRotation UnityEngine.Quaternion
----@return ,UnityEngine.Vector3,UnityEngine.Quaternion
-function UnityEngine.Transform:GetLocalPositionAndRotation(out_localPosition, out_localRotation) end
+---@return UnityEngine.Vector3, UnityEngine.Quaternion
+function UnityEngine.Transform:GetPositionAndRotation() end
+---@return UnityEngine.Vector3, UnityEngine.Quaternion
+function UnityEngine.Transform:GetLocalPositionAndRotation() end
 ---@overload fun(self: UnityEngine.Transform, translation: UnityEngine.Vector3, relativeTo: UnityEngine.Space)
 ---@overload fun(self: UnityEngine.Transform, translation: UnityEngine.Vector3)
 ---@overload fun(self: UnityEngine.Transform, x: number, y: number, z: number, relativeTo: UnityEngine.Space)
@@ -297,9 +292,8 @@ function UnityEngine.Component.New() end
 ---@return UnityEngine.Component
 function UnityEngine.Component:GetComponent(type) end
 ---@param type System.Type
----@param out_component UnityEngine.Component
----@return boolean,UnityEngine.Component
-function UnityEngine.Component:TryGetComponent(type, out_component) end
+---@return boolean, UnityEngine.Component
+function UnityEngine.Component:TryGetComponent(type, ) end
 ---@overload fun(self: UnityEngine.Component, t: System.Type, includeInactive: boolean) : UnityEngine.Component
 ---@param t System.Type
 ---@return UnityEngine.Component
@@ -392,7 +386,7 @@ function UnityEngine.MonoBehaviour:StartCoroutine(routine) end
 function UnityEngine.MonoBehaviour:StopCoroutine(methodName) end
 function UnityEngine.MonoBehaviour:StopAllCoroutines() end
 
----@class UnityEngine.Vector3 : System.ValueType
+---@class UnityEngine.Vector3 : System.ValueType & System.IFormattable & System.IEquatable
 ---@field kEpsilon number
 ---@field kEpsilonNormalSqrt number
 ---@field x number
@@ -435,7 +429,7 @@ function UnityEngine.Vector3.SlerpUnclamped(a, b, t) end
 ---@param ref_normal UnityEngine.Vector3
 ---@param ref_tangent UnityEngine.Vector3
 ---@param ref_binormal UnityEngine.Vector3
----@return ,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3
+---@return UnityEngine.Vector3, UnityEngine.Vector3, UnityEngine.Vector3
 function UnityEngine.Vector3.OrthoNormalize(ref_normal, ref_tangent, ref_binormal) end
 ---@param current UnityEngine.Vector3
 ---@param target UnityEngine.Vector3
@@ -466,7 +460,7 @@ function UnityEngine.Vector3.MoveTowards(current, target, maxDistanceDelta) end
 ---@param smoothTime number
 ---@param maxSpeed number
 ---@param deltaTime number
----@return UnityEngine.Vector3,UnityEngine.Vector3
+---@return UnityEngine.Vector3, UnityEngine.Vector3
 function UnityEngine.Vector3.SmoothDamp(current, target, ref_currentVelocity, smoothTime, maxSpeed, deltaTime) end
 ---@overload fun(a: UnityEngine.Vector3, b: UnityEngine.Vector3) : UnityEngine.Vector3
 ---@param scale UnityEngine.Vector3
@@ -541,7 +535,7 @@ function UnityEngine.Vector3:Equals(other) end
 ---@return string
 function UnityEngine.Vector3:ToString(format, formatProvider) end
 
----@class UnityEngine.Vector2 : System.ValueType
+---@class UnityEngine.Vector2 : System.ValueType & System.IFormattable & System.IEquatable
 ---@field kEpsilon number
 ---@field kEpsilonNormalSqrt number
 ---@field x number
@@ -630,7 +624,7 @@ function UnityEngine.Vector2.Max(lhs, rhs) end
 ---@param smoothTime number
 ---@param maxSpeed number
 ---@param deltaTime number
----@return UnityEngine.Vector2,UnityEngine.Vector2
+---@return UnityEngine.Vector2, UnityEngine.Vector2
 function UnityEngine.Vector2.SmoothDamp(current, target, ref_currentVelocity, smoothTime, maxSpeed, deltaTime) end
 ---@param newX number
 ---@param newY number
@@ -649,7 +643,7 @@ function UnityEngine.Vector2:GetHashCode() end
 ---@return boolean
 function UnityEngine.Vector2:Equals(other) end
 
----@class UnityEngine.Vector3Int : System.ValueType
+---@class UnityEngine.Vector3Int : System.ValueType & System.IFormattable & System.IEquatable
 ---@field zero UnityEngine.Vector3Int
 ---@field one UnityEngine.Vector3Int
 ---@field up UnityEngine.Vector3Int
@@ -718,7 +712,7 @@ function UnityEngine.Vector3Int:GetHashCode() end
 ---@return string
 function UnityEngine.Vector3Int:ToString(format, formatProvider) end
 
----@class UnityEngine.Vector2Int : System.ValueType
+---@class UnityEngine.Vector2Int : System.ValueType & System.IFormattable & System.IEquatable
 ---@field zero UnityEngine.Vector2Int
 ---@field one UnityEngine.Vector2Int
 ---@field up UnityEngine.Vector2Int
@@ -781,7 +775,7 @@ function UnityEngine.Vector2Int:GetHashCode() end
 ---@return string
 function UnityEngine.Vector2Int:ToString(format, formatProvider) end
 
----@class UnityEngine.Quaternion : System.ValueType
+---@class UnityEngine.Quaternion : System.ValueType & System.IFormattable & System.IEquatable
 ---@field kEpsilon number
 ---@field x number
 ---@field y number
@@ -864,10 +858,8 @@ function UnityEngine.Quaternion:Set(newX, newY, newZ, newW) end
 ---@param view UnityEngine.Vector3
 ---@param up UnityEngine.Vector3
 function UnityEngine.Quaternion:SetLookRotation(view, up) end
----@param out_angle number
----@param out_axis UnityEngine.Vector3
----@return ,number,UnityEngine.Vector3
-function UnityEngine.Quaternion:ToAngleAxis(out_angle, out_axis) end
+---@return number, UnityEngine.Vector3
+function UnityEngine.Quaternion:ToAngleAxis() end
 ---@param fromDirection UnityEngine.Vector3
 ---@param toDirection UnityEngine.Vector3
 function UnityEngine.Quaternion:SetFromToRotation(fromDirection, toDirection) end
@@ -884,7 +876,7 @@ function UnityEngine.Quaternion:Equals(other) end
 ---@return string
 function UnityEngine.Quaternion:ToString(format, formatProvider) end
 
----@class UnityEngine.Color : System.ValueType
+---@class UnityEngine.Color : System.ValueType & System.IFormattable & System.IEquatable
 ---@field r number
 ---@field g number
 ---@field b number
@@ -1072,11 +1064,8 @@ function UnityEngine.Color.Lerp(a, b, t) end
 ---@return UnityEngine.Color
 function UnityEngine.Color.LerpUnclamped(a, b, t) end
 ---@param rgbColor UnityEngine.Color
----@param out_H number
----@param out_S number
----@param out_V number
----@return ,number,number,number
-function UnityEngine.Color.RGBToHSV(rgbColor, out_H, out_S, out_V) end
+---@return number, number, number
+function UnityEngine.Color.RGBToHSV(rgbColor, ) end
 ---@overload fun(H: number, S: number, V: number) : UnityEngine.Color
 ---@param H number
 ---@param S number
@@ -1262,7 +1251,7 @@ function UnityEngine.Mathf.Approximately(a, b) end
 ---@param smoothTime number
 ---@param maxSpeed number
 ---@param deltaTime number
----@return number,number
+---@return number, number
 function UnityEngine.Mathf.SmoothDamp(current, target, ref_currentVelocity, smoothTime, maxSpeed, deltaTime) end
 ---@overload fun(current: number, target: number, ref_currentVelocity: number, smoothTime: number, maxSpeed: number) : number, number
 ---@overload fun(current: number, target: number, ref_currentVelocity: number, smoothTime: number) : number, number
@@ -1272,7 +1261,7 @@ function UnityEngine.Mathf.SmoothDamp(current, target, ref_currentVelocity, smoo
 ---@param smoothTime number
 ---@param maxSpeed number
 ---@param deltaTime number
----@return number,number
+---@return number, number
 function UnityEngine.Mathf.SmoothDampAngle(current, target, ref_currentVelocity, smoothTime, maxSpeed, deltaTime) end
 ---@param t number
 ---@param length number
@@ -1476,9 +1465,9 @@ function UnityEngine.Rigidbody2D:GetRelativePointVelocity(relativePoint) end
 ---@param colliders System.Collections.Generic.List
 ---@return number
 function UnityEngine.Rigidbody2D:GetContacts(contactFilter, colliders) end
----@overload fun(self: UnityEngine.Rigidbody2D, out_results: UnityEngine.Collider2D) : number, UnityEngine.Collider2D
+---@overload fun() : number, UnityEngine.Collider2D
 ---@overload fun(self: UnityEngine.Rigidbody2D, results: System.Collections.Generic.List) : number
----@overload fun(self: UnityEngine.Rigidbody2D, out_results: UnityEngine.Collider2D, findTriggers: boolean) : number, UnityEngine.Collider2D
+---@overload fun(findTriggers: boolean) : number, UnityEngine.Collider2D
 ---@param results System.Collections.Generic.List
 ---@param findTriggers boolean
 ---@return number
@@ -1501,7 +1490,7 @@ function UnityEngine.Rigidbody2D:GetShapes(physicsShapeGroup) end
 ---@param distance number
 ---@return number
 function UnityEngine.Rigidbody2D:Cast(position, angle, direction, contactFilter, results, distance) end
----@overload fun(self: UnityEngine.Rigidbody2D, contactFilter: UnityEngine.ContactFilter2D, out_results: UnityEngine.Collider2D) : number, UnityEngine.Collider2D
+---@overload fun(self: UnityEngine.Rigidbody2D, contactFilter: UnityEngine.ContactFilter2D, ) : number, UnityEngine.Collider2D
 ---@overload fun(self: UnityEngine.Rigidbody2D, results: System.Collections.Generic.List) : number
 ---@overload fun(self: UnityEngine.Rigidbody2D, contactFilter: UnityEngine.ContactFilter2D, results: System.Collections.Generic.List) : number
 ---@overload fun(self: UnityEngine.Rigidbody2D, position: UnityEngine.Vector2, angle: number, results: System.Collections.Generic.List) : number

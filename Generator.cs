@@ -252,11 +252,11 @@ namespace Editor.EmmyLuaSnippetGenerator
         {
             Sb.Clear();
             Sb.AppendLine("---@meta CSharp");
-            Sb.AppendLine("");
+            Sb.AppendLine();
             Sb.AppendLine("---@class NotExportType @表明该类型未导出");
-            Sb.AppendLine("");
+            Sb.AppendLine();
             Sb.AppendLine("---@class NotExportEnum @表明该枚举未导出");
-            Sb.AppendLine("");
+            Sb.AppendLine();
 
             WriteGlobalVariablesDefine();
 
@@ -278,7 +278,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                     Sb.AppendLine($"{namespaceCSharpAlias} = {{}}");
                 }
 
-                Sb.AppendLine("");
+                Sb.AppendLine();
             }
 
             foreach (var typeInst in ExportTypeList)
@@ -303,7 +303,7 @@ namespace Editor.EmmyLuaSnippetGenerator
                 WriteClassConstructorDefine(typeInst);
                 WriteClassMethodDefine(typeInst);
 
-                Sb.AppendLine("");
+                Sb.AppendLine();
             }
         }
 
@@ -352,7 +352,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             {
                 Sb.AppendLine($"---@type {varTypeName}");
                 Sb.AppendLine($"{varName} = nil");
-                Sb.AppendLine("");
+                Sb.AppendLine();
             }
         }
 
@@ -362,13 +362,13 @@ namespace Editor.EmmyLuaSnippetGenerator
             // CS table
             Sb.AppendLine("---@class CS");
             Sb.AppendLine("CS = {}");
-            Sb.AppendLine("");
+            Sb.AppendLine();
 
             // typeof function
-            Sb.AppendLine(@"---@param obj any");
-            Sb.AppendLine(@"---@return System.Type");
-            Sb.AppendLine(@"function typeof(obj) end");
-            Sb.AppendLine("");
+            Sb.AppendLine("---@param obj any");
+            Sb.AppendLine("---@return System.Type");
+            Sb.AppendLine("function typeof(obj) end");
+            Sb.AppendLine();
         }
 
         private static void WriteClassDefine(Type type)
@@ -526,7 +526,7 @@ namespace Editor.EmmyLuaSnippetGenerator
 
             Sb.AppendLine($"---@alias {typeCSharpAlias} {typeName}");
             Sb.AppendLine($"{typeCSharpAlias} = {typeName}");
-            Sb.AppendLine("");
+            Sb.AppendLine();
         }
 
         private static void WriteClassConstructorDefine(Type type)
@@ -666,12 +666,11 @@ namespace Editor.EmmyLuaSnippetGenerator
                 var parameterTypeName = parameterInfo.ParameterType.ToLuaTypeName().MakeLuaFunctionCompatible();
                 if (parameterInfo.IsOut)
                 {
-                    parameterName = "out_" + parameterName;
                     outOrRefParameterInfoList.Add(parameterInfo);
-
-                    parameterTypeName = parameterInfo.ParameterType.GetElementType().ToLuaTypeName().MakeLuaFunctionCompatible();
+                    continue;
                 }
-                else if (parameterInfo.ParameterType.IsByRef)
+
+                if (parameterInfo.ParameterType.IsByRef)
                 {
                     parameterName = "ref_" + parameterName;
                     outOrRefParameterInfoList.Add(parameterInfo);
@@ -744,12 +743,11 @@ namespace Editor.EmmyLuaSnippetGenerator
                 var parameterTypeName = parameterInfo.ParameterType.ToLuaTypeName();
                 if (parameterInfo.IsOut)
                 {
-                    parameterName = "out_" + parameterName;
                     outOrRefParameterInfoList.Add(parameterInfo);
-
-                    parameterTypeName = parameterInfo.ParameterType.GetElementType().ToLuaTypeName();
+                    continue;
                 }
-                else if (parameterInfo.ParameterType.IsByRef)
+
+                if (parameterInfo.ParameterType.IsByRef)
                 {
                     parameterName = "ref_" + parameterName;
                     outOrRefParameterInfoList.Add(parameterInfo);
@@ -768,27 +766,29 @@ namespace Editor.EmmyLuaSnippetGenerator
                 Sb.AppendLine($"---@param {parameterName} {parameterTypeName.MakeLuaFunctionCompatible()}");
             }
 
-            // return
-            var haveReturn = returnType != null && returnType != typeof(void) || outOrRefParameterInfoList.Count > 0;
-
-            if (haveReturn)
-            {
-                Sb.Append("---@return ");
-            }
-
+            var returnTypeList = new List<Type>();
             if (returnType != null && returnType != typeof(void))
             {
-                Sb.Append(returnType.ToLuaTypeName().MakeLuaFunctionCompatible());
+                returnTypeList.Add(returnType);
             }
 
             foreach (var parameterInfo in outOrRefParameterInfoList)
             {
-                Sb.Append($",{parameterInfo.ParameterType.GetElementType().ToLuaTypeName()}");
+                returnTypeList.Add(parameterInfo.ParameterType.GetElementType());
             }
 
-            if (haveReturn)
+            if (returnTypeList.Count > 0)
             {
-                Sb.AppendLine("");
+                Sb.Append("---@return ");
+                Sb.Append(returnTypeList[0].ToLuaTypeName().MakeLuaFunctionCompatible());
+
+                for (var i = 1; i < returnTypeList.Count; i++)
+                {
+                    Sb.Append(", ");
+                    Sb.Append(returnTypeList[i].ToLuaTypeName().MakeLuaFunctionCompatible());
+                }
+
+                Sb.AppendLine();
             }
 
             Sb.AppendLine(
@@ -894,7 +894,6 @@ namespace Editor.EmmyLuaSnippetGenerator
             { typeof(bool), "bool" },
             { typeof(string), "string" },
         };
-
 
         private static string EscapeLuaKeyword(string s)
         {
