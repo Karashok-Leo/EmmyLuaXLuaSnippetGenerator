@@ -88,6 +88,7 @@ namespace Editor.EmmyLuaSnippetGenerator
 
                 // var set = CollectAllExportType();
                 var types = XLuaHelper.LuaCallCSharpTypes;
+                ExportTypeList.Add(typeof(Type));
                 ExportTypeList.AddRange(types);
 
                 // _functionCompatibleTypes = _options.GetFunctionCompatibleTypes();
