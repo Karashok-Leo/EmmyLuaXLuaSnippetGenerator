@@ -659,6 +659,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             var outOrRefParameterInfoList = new List<ParameterInfo>();
 
             TempSb.Clear();
+            var firstParam = true;
             for (var i = 0; i < parameterInfos.Length; i++)
             {
                 var parameterInfo = parameterInfos[i];
@@ -686,11 +687,14 @@ namespace Editor.EmmyLuaSnippetGenerator
 
                 // write other parameters
                 parameterName = EscapeLuaKeyword(parameterName);
-                TempSb.Append(
-                    i == parameterInfos.Length - 1 ?
-                        $"{parameterName}: {parameterTypeName}" :
-                        $"{parameterName}: {parameterTypeName}, "
-                );
+
+                if (!firstParam)
+                {
+                    TempSb.Append(", ");
+                }
+
+                TempSb.Append($"{parameterName}: {parameterTypeName}");
+                firstParam = false;
             }
 
             // return
@@ -736,6 +740,7 @@ namespace Editor.EmmyLuaSnippetGenerator
             var outOrRefParameterInfoList = new List<ParameterInfo>();
 
             TempSb.Clear();
+            var firstParam = true;
             for (var i = 0; i < parameterInfos.Length; i++)
             {
                 var parameterInfo = parameterInfos[i];
@@ -757,11 +762,13 @@ namespace Editor.EmmyLuaSnippetGenerator
 
                 parameterName = EscapeLuaKeyword(parameterName);
 
-                TempSb.Append(
-                    i == parameterInfos.Length - 1 ?
-                        parameterName :
-                        $"{parameterName}, "
-                );
+                if (!firstParam)
+                {
+                    TempSb.Append(", ");
+                }
+
+                TempSb.Append(parameterName);
+                firstParam = false;
 
                 Sb.AppendLine($"---@param {parameterName} {parameterTypeName.MakeLuaFunctionCompatible()}");
             }
